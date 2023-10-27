@@ -22,8 +22,11 @@ public class Demo {
 
 			Statement statement = connection.createStatement();
 
-//			String print = "select * from Employee;";
+//			creating table in database test
+			String createTable = "CREATE TABLE IF NOT EXISTS asgn (id INT, name VARCHAR(255));";
+            		statement.executeUpdate(createTable);
 
+			
 			ResultSet result;
 
 			Scanner in = new Scanner(System.in);
