@@ -1,0 +1,119 @@
+su root
+mysql -u root -p
+create database Pract;
+use Pract;
+
+create table NewName(id int, name varchar(20));
+insert into NewName values (18,"ram");
+insert into NewName values (8,"kel");
+
+create table OldName(id int primary key,name varchar(50));
+insert into OldName values (11,"Rajas");
+insert into OldName values (7,"Ratake");
+
+select * from OldName;
++----+--------+
+| id | name   |
++----+--------+
+|  7 | Ratake |
+| 11 | Rajas  |
++----+--------+
+
+select * from NewName;
++------+------+
+| id   | name |
++------+------+
+|   18 | ram  |
+|    8 | kel  |
++------+------+
+
+delimiter //
+ create Procedure Merge() 
+ begin 
+ 	DECLARE oldid INT; 
+ 	DECLARE oldname VARCHAR(20);
+ 	DECLARE done BOOLEAN DEFAULT FALSE;
+ 	DECLARE c1 CURSOR FOR SELECT id, name FROM OldName; 
+ 	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE; 		
+ 	open c1; 
+ 	fetch c1 into oldid,oldname;
+ 	while not done do
+ 		if not exists (select * from NewName where id=oldid) 
+ 		then insert into NewName values (oldid,oldname);
+ 		end if; 
+ 		fetch c1 into oldid,oldname;
+ 	end while; 
+ 	close c1; 
+ end;
+ //
+ delimiter;
+ 
+
+ select * from OldName;
++----+--------+
+| id | name   |
++----+--------+
+|  7 | Ratake |
+| 11 | Rajas  |
++----+--------+
+
+mysql> select * from NewName;
++------+------+
+| id   | name |
++------+------+
+|   18 | ram  |
+|    8 | kel  |
++------+------+
+
+mysql> call Merge();
+
+mysql> select * from NewName;
++------+--------+
+| id   | name   |
++------+--------+
+|   18 | ram    |
+|    8 | kel    |
+|    7 | Ratake |
+|   11 | Rajas  |
++------+--------+
+
+//new one
+mysql> DELIMITER //
+mysql> CREATE PROCEDURE MergeTwo()
+    -> BEGIN
+    ->     DECLARE done INT DEFAULT 0;
+    ->     DECLARE old_id INT;
+    ->     DECLARE old_name VARCHAR(20);
+    ->     
+    ->     -- Declare a cursor to fetch records from OldName.
+    ->     DECLARE cur CURSOR FOR SELECT id, name FROM OldName;
+    ->     
+    ->     -- Declare handlers for exceptions.
+    ->     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+    -> 
+    ->     -- Open the cursor.
+    ->     OPEN cur;
+    -> 
+    ->     merge_loop: LOOP
+    ->         -- Fetch a record from OldName.
+    ->         FETCH cur INTO old_id, old_name;
+    ->         
+    ->         -- If there are no more records in OldName, exit the loop.
+    ->         IF done = 1 THEN
+    ->             LEAVE merge_loop;
+    ->         END IF;
+    -> 
+    ->         -- Check if the record exists in NewName.
+    ->         IF (SELECT COUNT(*) FROM NewName WHERE id = old_id AND name = old_name) = 0 THEN
+    ->             -- The record does not exist in NewName, so insert it.
+    ->             INSERT INTO NewName (id, name) VALUES (old_id, old_name);
+    ->         END IF;
+    ->     END LOOP;
+    -> 
+    ->     -- Close the cursor.
+    ->     CLOSE cur;
+    -> END;
+    -> //
+Query OK, 0 rows affected (0.13 sec)
+
+mysql> DELIMITER ;
