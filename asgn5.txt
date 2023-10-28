@@ -1,0 +1,78 @@
+mysql> DROP PROCEDURE IF EXISTS setData;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> drop function getCat;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> select * from asgn5;
++----+--------+-------+
+| id | name   | grade |
++----+--------+-------+
+|  1 | manish | C     |
+|  3 | kan    | O1    |
++----+--------+-------+
+2 rows in set (0.00 sec)
+                                                                            ***** add deterministic in creating a function******
+mysql> delimiter //
+mysql> create function getCat(marks int) returns varchar(100) deterministic 
+    -> begin
+    -> declare grade varchar(100);
+    -> if marks>90 then set grade ="O+";
+    -> elseif marks<40 then set grade="Fail";
+    -> elseif marks>80 and marks<91 then set grade="A+";
+    -> else set grade="B+";
+    -> end if;
+    -> return grade;
+    -> end;
+    -> //
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> delimiter ;
+mysql> delimiter //
+mysql> create procedure setData(in marks int,in name varchar(100),in id int)
+    -> begin
+    -> insert into asgn5 values (id,name,getCat(marks));
+    -> end;
+    -> //
+Query OK, 0 rows affected (0.00 sec)
+
+Query OK, 1 row affected (0.01 sec)
+
+mysql> delimiter ;
+mysql> call setData(13,"mirlo",7);
+
+
+mysql> call setData(14,"mir",95);
+
+
+mysql> call setData(15,"jaoil",84);
+
+
+mysql> select * from asgn5;
++----+--------+-------+
+| id | name   | grade |
++----+--------+-------+
+|  1 | manish | C     |
+|  3 | kan    | O1    |
+|  7 | mirlo  | Fail  |
+| 77 | kelya  | Fail  |
+| 84 | jaoil  | Fail  |
+| 95 | mir    | Fail  |
++----+--------+-------+
+6 rows in set (0.00 sec)
+
+mysql> call setData(95,"jaoil",8);
+
+mysql> select * from asgn5;
++----+--------+-------+
+| id | name   | grade |
++----+--------+-------+
+|  1 | manish | C     |
+|  3 | kan    | O1    |
+|  7 | mirlo  | Fail  |
+|  8 | jaoil  | O+    |
+| 77 | kelya  | Fail  |
+| 84 | jaoil  | Fail  |
+| 95 | mir    | Fail  |
++----+--------+-------+
+
