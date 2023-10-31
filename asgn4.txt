@@ -1,0 +1,78 @@
+mysql> create table asgn4_books( roll int primary key, name varchar(50), status varchar(20), issueDate date);
+
+mysql> insert into asgn4_books values (1,"spos","Issued",'2023-09-20');
+mysql> insert into asgn4_books values (2,"CNSL","Issued",'2023-09-30'),(3,"STC","Issued",'2023-10-29');
+
+
+mysql> create table asgn4_fine( roll int, returnDate date, fine int, foreign key (roll) references asgn4_books (roll));
+
+mysql> select * from asgn4_books;
++------+------+--------+------------+
+| roll | name | status | issueDate  |
++------+------+--------+------------+
+|    1 | spos | Issued | 2023-09-20 |
+|    2 | CNSL | Issued | 2023-09-30 |
+|    3 | STC  | Issued | 2023-10-29 |
++------+------+--------+------------+
+
+
+mysql> create procedure calcFine(rollNo int,book varchar(50)) begin declare noOFDays int;declare fine int;declare DateIssue date;declare futureDate condition for SQLSTATE '45000';
+    -> declare continue handler for not found set noOFDays=NULL;
+    -> select issueDate into DateIssue from asgn4_books where roll=roolNo and name=book;
+    -> set fine=0;
+    -> set noOFDays=DATEDIFF(CURDATE(),DateIssue);
+    -> if noOFDays is NULL then select "NOT VALID";
+    -> elseif noOFDays<0 then select "NOT VALID Entry";
+    -> else 
+    -> if noOFDays>30 then set fine=150+(noOFDays-30)*50;
+    -> elseif noOFDays>15 then set fine=noOFDays*5;
+    -> end if;
+    -> update asgn4_books set status="Received" where roll=rollNo;
+    -> insert into asgn4_fine values (rollNo,CURDATE(),fine);
+    -> end if;
+    -> end;
+    -> //
+    -> delimiter ;
+Query OK, 0 rows affected (0.00 sec)
+
+
+							// OUTPUT
+mysql> call calcFine(2,"CN");
++-----------+
+| NOT VALID |
++-----------+
+| NOT VALID |
++-----------+
+
+mysql> call calcFine(2,"CNSL");
+mysql> select * from asgn4_books;
++------+------+----------+------------+
+| roll | name | status   | issueDate  |
++------+------+----------+------------+
+|    1 | spos | Issued   | 2023-09-20 |
+|    2 | CNSL | Received | 2023-09-30 |
+|    3 | STC  | Issued   | 2023-10-29 |
++------+------+----------+------------+
+mysql> select * from asgn4_fine;
++------+------------+------+
+| roll | returnDate | fine |
++------+------------+------+
+|    2 | 2023-10-31 |  200 |
+|    2 | 2023-10-31 |  200 |
++------+------------+------+
+mysql> call calcFine(5,"ram");
++-----------+
+| NOT VALID |
++-----------+
+| NOT VALID |
++-----------+
+
+mysql> call calcFine(3,"STC");
+mysql> select * from asgn4_fine;
++------+------------+------+
+| roll | returnDate | fine |
++------+------------+------+
+|    2 | 2023-10-31 |  200 |
+|    2 | 2023-10-31 |  200 |
+|    3 | 2023-10-31 |    0 |
++------+------------+------+
