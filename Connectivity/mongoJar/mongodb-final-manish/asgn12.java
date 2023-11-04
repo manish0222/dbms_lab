@@ -1,0 +1,110 @@
+//package mongoConnect;
+
+import com.mongodb.MongoClient;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+import org.bson.Document;
+import java.util.Scanner;
+
+public class manish {
+
+    static MongoCollection<Document> collection;
+    static Scanner sc = new Scanner(System.in);
+    static MongoClient mongo;
+    public static void init() throws Exception{
+
+        mongo = new MongoClient("10.10.15.96",27017);
+        MongoDatabase db = mongo.getDatabase("mongo31");
+        db.createCollection("manish");
+        collection = db.getCollection("manish");
+        System.out.println("Connection Established...");
+    }
+
+    public static void insertRecords(){
+
+        System.out.println("Enter the Roll No: ");
+        int roll = sc.nextInt();
+        System.out.println("Enter the Name: ");
+        String name = sc.next();
+        System.out.println("Enter the Branch: ");
+        String branch = sc.next();
+        System.out.println("Enter the Class: ");
+        String cls = sc.next();
+
+        Document doc = new Document("roll",roll);
+        doc.append("name",name);
+        doc.append("branch",branch);
+        doc.append("class",cls);
+
+        collection.insertOne(doc);
+        System.out.println("Record Inserted!");
+    }
+
+    public static void readRecords(){
+
+        FindIterable <Document> itr = collection.find();
+
+        for (Document document : itr) {
+            System.out.println(document);
+        }
+    }
+
+    public static void updateRecords(){
+
+        System.out.println("Enter the Roll No of field: ");
+        int roll = sc.nextInt();
+        System.out.println("Enter Name of field to change to value: ");
+        String fieldName = sc.next();
+        System.out.println("Enter the value that needs to update: ");
+        String updateValue = sc.next();
+
+        collection.updateOne(Filters.eq("roll",roll), Updates.set(fieldName,updateValue));
+        System.out.println("Record Updated!");
+
+    }
+
+    public static void deleteRecords(){
+
+        System.out.println("Enter the Roll Number of Record: ");
+        int roll = sc.nextInt();
+
+        collection.deleteOne(Filters.eq("roll",roll));
+        System.out.println("Record Deleted!");
+    }
+
+    public static void main(String[] args) throws Exception{
+
+        init();
+
+        while (true){
+
+            System.out.println("---------Menu-------");
+            System.out.println("1. Insert Records");
+            System.out.println("2. Find Records");
+            System.out.println("3. Update Records");
+            System.out.println("4. Delete Records");
+            System.out.println("5. Exit");
+
+            System.out.println("Enter Your Choice: ");
+            int choice = sc.nextInt();
+
+            switch (choice){
+
+                case 1: insertRecords();break;
+                case 2: readRecords();break;
+                case 3: updateRecords();break;
+                case 4: deleteRecords();break;
+                case 5:
+                    System.out.println("Thank You!");
+                    mongo.close();
+                    System.exit(0);
+                default:
+                    System.out.println("Please select option from above menu....!");
+                    break;
+            }
+        }
+    }
+}
