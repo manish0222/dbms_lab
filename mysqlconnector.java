@@ -1,6 +1,6 @@
 //install jar all files including jar file path
 
-package sql;
+//package sql;
 
 import java.util.*;
 
@@ -8,7 +8,7 @@ import java.sql.*;
 
 
 
-public class Demo {
+public class mysql8 {
 
 	public static void main(String args[]) {
 
@@ -18,12 +18,12 @@ public class Demo {
 
 			Class.forName("com.mysql.cj.jdbc.Driver");
 
-			connection = DriverManager.getConnection("jdbc:mysql://10.10.15.233/test","te31226","te31226");
+			connection = DriverManager.getConnection("jdbc:mysql://10.10.15.96/sql33db","sql33","sql33");
 
 			Statement statement = connection.createStatement();
 
 //			creating table in database test
-			String createTable = "CREATE TABLE IF NOT EXISTS asgn (id INT, name VARCHAR(255));";
+			String createTable = "CREATE TABLE IF NOT EXISTS asgn (id VARCHAR(255), name VARCHAR(255));";
             		statement.executeUpdate(createTable);
 
 			
@@ -80,7 +80,6 @@ public class Demo {
 					String insert = "insert into asgn values(" + id + "," +" ' "  + name + "');";
 
 					statement.executeUpdate(insert);
-
 				}
 
 				else if(c == 3) {
