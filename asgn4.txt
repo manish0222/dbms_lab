@@ -16,9 +16,11 @@ mysql> select * from asgn4_books;
 +------+------+--------+------------+
 
 
-mysql> create procedure calcFine(rollNo int,book varchar(50)) begin declare noOFDays int;declare fine int;declare DateIssue date;declare futureDate condition for SQLSTATE '45000';
+mysql> create procedure calcFine(rollNo int,book varchar(50)) begin declare noOFDays int;
+    -> declare fine int;declare DateIssue date;
+    -> declare futureDate condition for SQLSTATE '45000';
     -> declare continue handler for not found set noOFDays=NULL;
-    -> select issueDate into DateIssue from asgn4_books where roll=roolNo and name=book;
+    -> select issueDate into DateIssue from asgn4_books where roll=roolNo and name=book and status="Issued";
     -> set fine=0;
     -> set noOFDays=DATEDIFF(CURDATE(),DateIssue);
     -> if noOFDays is NULL then select "NOT VALID";
